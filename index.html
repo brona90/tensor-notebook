@@ -438,6 +438,13 @@ ul.refs .ref-note {
   line-height: 1.5;
   font-style: italic;
 }
+ul.refs a {
+  color: var(--vec);
+  text-decoration: none;
+  border-bottom: 1px solid var(--vec-soft);
+  transition: border-color 0.2s;
+}
+ul.refs a:hover { border-bottom-color: var(--vec); }
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; gap: 0; padding: 32px 22px 80px; }
   aside.toc { position: static; max-height: none; margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
