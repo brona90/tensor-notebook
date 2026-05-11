@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Tensor Notebook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}], throwOnError:false});"></script>
+<style>
+:root {
+  --bg: #F7F1E5;
+  --bg-soft: #EFE7D4;
+  --bg-card: #FBF7EC;
+  --text: #1F1611;
+  --text-muted: #6B5A48;
+  --text-faint: #8A7A66;
+  --border: #C7B895;
+  --border-soft: #D8CCB1;
+  --vec: #5B2D81;
+  --vec-soft: #E8DDF1;
+  --cov: #155E45;
+  --cov-soft: #D6E7DD;
+  --metric: #8B5A1B;
+  --metric-soft: #F2E5CC;
+  --warn: #8B2618;
+  --warn-soft: #F2D8D4;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --serif: 'Crimson Pro', Georgia, serif;
+  --display: 'Fraunces', Georgia, serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.65;
+  font-weight: 400;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 60px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 60px 40px 120px;
+}
+aside.toc {
+  position: sticky;
+  top: 32px;
+  align-self: start;
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  font-family: var(--sans);
+  font-size: 13px;
+}
+aside.toc .toc-head {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+aside.toc ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  counter-reset: toc;
+}
+aside.toc li {
+  counter-increment: toc;
+  margin-bottom: 10px;
+  line-height: 1.45;
+}
+aside.toc li::before {
+  content: "§" counter(toc) "  ";
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+aside.toc a {
+  color: var(--text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+aside.toc a:hover { color: var(--text); border-bottom-color: var(--border); }
+aside.toc a.active { color: var(--vec); font-weight: 500; }
+main { min-width: 0; }
+header.title {
+  margin-bottom: 80px;
+  padding-bottom: 36px;
+  border-bottom: 1px solid var(--border);
+}
+header.title .kicker {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 18px;
+}
+header.title h1 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 64px;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 0 0 22px;
+  font-style: italic;
+}
+header.title h1 em {
+  font-style: normal;
+  color: var(--vec);
+}
+header.title .subtitle {
+  font-family: var(--serif);
+  font-size: 21px;
+  font-style: italic;
+  color: var(--text-muted);
+  max-width: 580px;
+  line-height: 1.45;
+}
+section.chapter { margin-bottom: 96px; scroll-margin-top: 24px; }
+section.chapter .ch-num {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--vec);
+  margin-bottom: 12px;
+}
+section.chapter h2 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin: 0 0 14px;
+  font-style: italic;
+}
+section.chapter .lede {
+  font-family: var(--serif);
+  font-size: 20px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0 0 36px;
+  max-width: 64ch;
+}
+section.chapter h3 {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 22px;
+  margin: 44px 0 14px;
+  letter-spacing: -0.005em;
+}
+section.chapter p { margin: 0 0 18px; max-width: 68ch; }
+section.chapter p + p { margin-top: 0; }
+.def {
+  background: var(--bg-card);
+  border-left: 3px solid var(--vec);
+  padding: 22px 28px 18px;
+  margin: 28px 0;
+  border-radius: 2px;
+}
+.def .def-label {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--vec);
+  margin-bottom: 10px;
+}
+.def .def-name {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 19px;
+  margin-bottom: 8px;
+}
+.def p:last-child { margin-bottom: 0; }
+.def.cov-flavor { border-left-color: var(--cov); }
+.def.cov-flavor .def-label { color: var(--cov); }
+.def.metric-flavor { border-left-color: var(--metric); }
+.def.metric-flavor .def-label { color: var(--metric); }
+.remember {
+  background: var(--bg-soft);
+  padding: 18px 24px;
+  margin: 28px 0;
+  border-radius: 4px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--text);
+  position: relative;
+}
+.remember::before {
+  content: "Remember.";
+  font-family: var(--sans);
+  font-style: normal;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--vec);
+  display: block;
+  margin-bottom: 6px;
+}
+.example {
+  border-top: 1px solid var(--border-soft);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 24px 0;
+  margin: 32px 0;
+}
+.example .ex-label {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 14px;
+}
+.callout-warn {
+  background: var(--warn-soft);
+  border-left: 3px solid var(--warn);
+  padding: 18px 24px;
+  margin: 24px 0;
+  font-size: 17px;
+  border-radius: 2px;
+}
+.callout-warn::before {
+  content: "Watch out.";
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--warn);
+  display: block;
+  margin-bottom: 6px;
+}
+.viz {
+  margin: 36px 0;
+  padding: 24px;
+  background: var(--bg-card);
+  border-radius: 6px;
+  border: 1px solid var(--border-soft);
+}
+.viz h4 {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 0 0 8px;
+}
+.viz .viz-cap {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--text-muted);
+  margin: 0 0 18px;
+  font-size: 16px;
+}
+.viz svg { display: block; width: 100%; height: auto; background: var(--bg); border-radius: 4px; }
+.viz .ctrl-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; font-family: var(--mono); font-size: 13px; }
+.viz .ctrl-lbl { min-width: 90px; color: var(--text-muted); }
+.viz .ctrl-val { min-width: 52px; text-align: right; }
+.viz input[type=range] {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border-soft);
+  border-radius: 2px;
+  outline: none;
+}
+.viz input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--vec);
+  cursor: pointer;
+  border: 2px solid var(--bg-card);
+}
+.viz input[type=range]::-moz-range-thumb {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--vec);
+  cursor: pointer;
+  border: 2px solid var(--bg-card);
+}
+.viz .readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 18px; }
+.viz .readout {
+  background: var(--bg);
+  padding: 10px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--border-soft);
+}
+.viz .readout-lbl { font-family: var(--sans); font-size: 11px; color: var(--text-muted); letter-spacing: 0.02em; }
+.viz .readout-val { font-family: var(--mono); font-size: 17px; font-weight: 500; margin-top: 2px; }
+.viz .formula-strip {
+  background: var(--bg);
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 14px;
+  text-align: center;
+  margin-top: 14px;
+  border: 1px solid var(--border-soft);
+}
+.viz .warn-strip {
+  background: var(--warn-soft);
+  color: var(--warn);
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 12px;
+}
+.notes {
+  margin-top: 28px;
+  padding: 20px 22px;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+}
+.notes .notes-head {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 10px;
+}
+.notes textarea {
+  width: 100%;
+  min-height: 96px;
+  border: none;
+  background: transparent;
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--text);
+  resize: vertical;
+  outline: none;
+}
+.notes textarea::placeholder { color: var(--text-faint); font-style: italic; }
+.notes .saved { font-family: var(--sans); font-size: 11px; color: var(--text-faint); margin-top: 6px; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+.tag {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: var(--bg-soft);
+  color: var(--text-muted);
+  border: 1px solid var(--border-soft);
+}
+.tag.vec { background: var(--vec-soft); color: var(--vec); border-color: transparent; }
+.tag.cov { background: var(--cov-soft); color: var(--cov); border-color: transparent; }
+.tag.metric { background: var(--metric-soft); color: var(--metric); border-color: transparent; }
+ul.clean { padding-left: 22px; margin: 12px 0 22px; }
+ul.clean li { margin-bottom: 6px; }
+.three-ops {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 24px 0;
+}
+.three-ops .op-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  padding: 18px;
+  border-radius: 4px;
+}
+.three-ops .op-card .op-name {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.three-ops .op-card .op-desc { font-size: 16px; color: var(--text-muted); line-height: 1.5; }
+footer.coda {
+  margin-top: 100px;
+  padding-top: 36px;
+  border-top: 1px solid var(--border);
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 17px;
+}
+ul.refs {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 32px;
+}
+ul.refs li {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+ul.refs li:last-child { border-bottom: none; }
+ul.refs .ref-title {
+  font-family: var(--serif);
+  font-size: 18px;
+  color: var(--text);
+  line-height: 1.4;
+}
+ul.refs .ref-title em {
+  font-style: italic;
+  color: var(--vec);
+}
+ul.refs .ref-note {
+  font-family: var(--serif);
+  font-size: 16px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  font-style: italic;
+}
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; gap: 0; padding: 32px 22px 80px; }
+  aside.toc { position: static; max-height: none; margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  header.title h1 { font-size: 44px; }
+  section.chapter h2 { font-size: 30px; }
+  body { font-size: 17px; }
+  .three-ops { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<aside class="toc">
+  <div class="toc-head">Contents</div>
+  <ol>
+    <li><a href="#vectors">Vectors as arrows</a></li>
+    <li><a href="#linalg">Linear algebra, briefly</a></li>
+    <li><a href="#contra">Contravariant transformation</a></li>
+    <li><a href="#covectors">Covectors</a></li>
+    <li><a href="#metric">The metric tensor</a></li>
+    <li><a href="#products">Tensor products and rank</a></li>
+    <li><a href="#contraction">Contraction</a></li>
+    <li><a href="#whatnext">What comes next</a></li>
+    <li><a href="#refs">References</a></li>
+  </ol>
+</aside>
+
+<main>
+
+<header class="title">
+  <div class="kicker">A working notebook · Tensor calculus, reconstructed</div>
+  <h1>The geometry of <em>indices</em>.</h1>
+  <p class="subtitle">A self-contained reference built from first principles, with live visualizations and a place for your own notes. Open it, scroll it, scribble in it.</p>
+</header>
+
+<section class="chapter" id="vectors">
+  <div class="ch-num">§ 1 · Vectors</div>
+  <h2>Arrows, equivalence classes, and the things they shadow.</h2>
+  <p class="lede">A vector is the geometric object. Its components are the shadow that object casts in a chosen basis. Tensor analysis is the discipline of writing equations that respect the difference.</p>
+  <div class="tag-row">
+    <span class="tag vec">rank (1,0)</span>
+    <span class="tag vec">upper index $v^i$</span>
+    <span class="tag vec">contravariant</span>
+  </div>
+  <div class="def">
+    <div class="def-label">Definition</div>
+    <div class="def-name">Free vector</div>
+    <p>In flat $\mathbb{R}^n$, a <em>vector</em> is an equivalence class of directed line segments $(p, q)$ under the relation</p>
+    <p>$(p_1, q_1) \sim (p_2, q_2) \iff q_1 - p_1 = q_2 - p_2.$</p>
+    <p>Two arrows are equivalent if one is a parallel translate of the other. The vector $\vec v$ is the entire equivalence class.</p>
+  </div>
+  <p>This definition works in flat space. On curved spaces — the sphere, spacetime — parallel translation is path-dependent, so we attach a separate tangent space $T_p M$ to each point. Vectors at distinct points live in distinct spaces.</p>
+  <h3>Components</h3>
+  <p>Pick a basis $\{e_1, \ldots, e_n\}$. Every vector has a unique decomposition $\vec v = v^i e_i$ (Einstein convention: sum over $i$). The upper index marks contravariant character.</p>
+  <div class="remember">A vector is not its components. The components are coordinate-dependent labels; the vector is the geometric object that exists independently of the basis you happened to pick.</div>
+  <div class="viz" id="viz-1">
+    <h4>Visualization 1 · Invariant vector, rotating basis</h4>
+    <p class="viz-cap">The purple arrow is fixed in space. Rotating the teal basis changes $v^1, v^2$ — but not the vector, its length, or its world-direction.</p>
+    <svg id="v1-svg" viewBox="0 0 460 320"></svg>
+    <div class="ctrl-row"><span class="ctrl-lbl">Rotate basis θ</span><input type="range" min="-180" max="180" value="0" step="1" id="v1-theta"><span class="ctrl-val" id="v1-theta-out">0°</span></div>
+    <div class="formula-strip" id="v1-eq">v = 3.00 e₁ + 2.00 e₂</div>
+    <div class="readouts">
+      <div class="readout"><div class="readout-lbl">v¹ (component along e₁)</div><div class="readout-val" id="v1-c1">3.00</div></div>
+      <div class="readout"><div class="readout-lbl">v² (component along e₂)</div><div class="readout-val" id="v1-c2">2.00</div></div>
+      <div class="readout"><div class="readout-lbl">‖v‖ — invariant length</div><div class="readout-val" id="v1-len">3.61</div></div>
+      <div class="readout"><div class="readout-lbl">world direction</div><div class="readout-val" id="v1-dir">33.7°</div></div>
+    </div>
+  </div>
+  <div class="notes" data-key="notes-vectors"><div class="notes-head">Your notes</div><textarea placeholder="Things to remember, questions, your own derivations…"></textarea><div class="saved"></div></div>
+</section>
+
+<section class="chapter" id="linalg">
+  <div class="ch-num">§ 2 · Linear algebra refresher</div>
+  <h2>What a basis is, and how to know you have one.</h2>
+  <p class="lede">Everything in tensor analysis assumes a working memory of basis, linear independence, change-of-basis matrices, and inverses.</p>
+  <div class="def">
+    <div class="def-label">Essentials</div>
+    <p><strong>Vector space</strong> $V$: a set you can add and scale, obeying the usual rules.</p>
+    <p><strong>Basis</strong> $\{e_1, \ldots, e_n\}$: every $v \in V$ has a <em>unique</em> decomposition $v = v^i e_i$.</p>
+    <p><strong>Linear independence</strong>: $a^i e_i = 0$ forces every $a^i = 0$.</p>
+    <p><strong>Linear map</strong> $L : V \to W$: $L(au + bv) = a\,L(u) + b\,L(v)$.</p>
+  </div>
+  <h3>The basis test</h3>
+  <p>$n$ vectors in an $n$-dimensional space form a basis if and only if the matrix of their columns has nonzero determinant.</p>
+  <div class="example">
+    <div class="ex-label">Worked examples</div>
+    <p>$\{(1,3),(2,6)\}$: $\det = 0$. Not a basis. &nbsp; $\{(1,0),(1,1)\}$: $\det = 1$. Basis. &nbsp; $\{(1,2),(3,4),(5,6)\}$: three vectors in 2D — cannot be a basis.</p>
+  </div>
+  <h3>Inverse of a $2\times 2$ matrix</h3>
+  <p>$$M = \begin{pmatrix} a & b \\ c & d \end{pmatrix}, \quad M^{-1} = \frac{1}{ad - bc}\begin{pmatrix} d & -b \\ -c & a \end{pmatrix}.$$</p>
+  <p>The determinant $ad - bc$ is the signed area of the parallelogram spanned by the columns. Zero area: no inverse.</p>
+  <div class="def">
+    <div class="def-label">Change-of-basis matrix</div>
+    <div class="def-name">$M^i{}_j$ (also: transition matrix, Jacobian, Lorentz transformation)</div>
+    <p>$\tilde e_j = M^i{}_j \, e_i.$ The columns of $M$ are the new basis vectors in the old basis. Because both are bases, $M$ is invertible.</p>
+  </div>
+  <div class="notes" data-key="notes-linalg"><div class="notes-head">Your notes</div><textarea placeholder="Quick re-derivations, mnemonics, sticking points…"></textarea><div class="saved"></div></div>
+</section>
+
+<section class="chapter" id="contra">
+  <div class="ch-num">§ 3 · Contravariant transformation</div>
+  <h2>How vector components transform.</h2>
+  <p class="lede">The single derivation that the rest of tensor analysis depends on.</p>
+  <p>Write $v$ in two bases: $v = v^i e_i = \tilde v^j \tilde e_j.$ Substitute $\tilde e_j = M^i{}_j e_i$, collect by $e_i$, use uniqueness:</p>
+  <p>$$v^i = M^i{}_j \, \tilde v^j.$$</p>
+  <p>Apply $M^{-1}$:</p>
+  <div class="def">
+    <div class="def-label">Transformation law · contravariant</div>
+    <p>$$\boxed{\;\tilde v^j = (M^{-1})^j{}_i \, v^i\;}$$</p>
+    <p>Components transform with $M^{-1}$, opposite to the basis. <em>Contra</em>variant. Upper index.</p>
+  </div>
+  <div class="example">
+    <div class="ex-label">Concrete check (doubled basis)</div>
+    <p>$\tilde e_i = 2 e_i$: $M = 2I$, $M^{-1} = \tfrac{1}{2}I$. Old components $(4,6)$ → new components $(2,3)$. Basis doubled, components halved. Same arrow, fewer ruler-lengths.</p>
+  </div>
+  <div class="remember">Components and basis are inversely yoked. Double the rulers, halve the readings. That is contravariance.</div>
+  <div class="notes" data-key="notes-contra"><div class="notes-head">Your notes</div><textarea placeholder="Re-derive in your own hand. The third time is when it sticks."></textarea><div class="saved"></div></div>
+</section>
+
+<section class="chapter" id="covectors">
+  <div class="ch-num">§ 4 · Covectors</div>
+  <h2>Linear measurements, stacks of surfaces, the lower index.</h2>
+  <p class="lede">The dual of a vector space. Elements are not arrows but rulers: they take vectors and return numbers.</p>
+  <div class="tag-row">
+    <span class="tag cov">rank (0,1)</span>
+    <span class="tag cov">lower index $\omega_i$</span>
+    <span class="tag cov">covariant</span>
+  </div>
+  <div class="def cov-flavor">
+    <div class="def-label">Definition</div>
+    <div class="def-name">Covector (dual vector, one-form)</div>
+    <p>A linear map $\omega : V \to \mathbb{R}$. Components $\omega_i := \omega(e_i)$. For any $v = v^j e_j$: $\omega(v) = \omega_j v^j$ — invariant scalar.</p>
+  </div>
+  <div class="def cov-flavor">
+    <div class="def-label">Transformation law · covariant</div>
+    <p>$$\boxed{\;\tilde \omega_j = M^i{}_j \, \omega_i\;}$$</p>
+    <p>Covector components transform <em>with</em> $M$, same direction as the basis. <em>Co</em>variant. Lower index.</p>
+  </div>
+  <p>Geometrically: a vector is an arrow. A covector is a stack of parallel hyperplanes. $\omega(v)$ counts how many the arrow pierces.</p>
+  <div class="remember">A vector points. A covector measures. The pairing $\omega_i v^i$ — one upper, one lower — is coordinate-invariant.</div>
+  <div class="example">
+    <div class="ex-label">Canonical example · the gradient</div>
+    <p>$\partial f/\partial x^i$ is a covector. The directional derivative $v^i \partial f/\partial x^i$ is a covariant–contravariant contraction. You have been doing this since multivariable calculus.</p>
+  </div>
+  <div class="viz" id="viz-2">
+    <h4>Visualization 2 · Covector as a stack of level lines</h4>
+    <p class="viz-cap">$\omega(v) = \omega_i v^i$ is the count of lines the vector pierces.</p>
+    <svg id="v2-svg" viewBox="0 0 460 340"></svg>
+    <div class="ctrl-row"><span class="ctrl-lbl">ω₁</span><input type="range" min="-3" max="3" value="1" step="0.1" id="v2-w1"><span class="ctrl-val" id="v2-w1-out">1.0</span></div>
+    <div class="ctrl-row"><span class="ctrl-lbl">ω₂</span><input type="range" min="-3" max="3" value="2" step="0.1" id="v2-w2"><span class="ctrl-val" id="v2-w2-out">2.0</span></div>
+    <div class="ctrl-row"><span class="ctrl-lbl">v¹</span><input type="range" min="-4" max="4" value="3" step="0.1" id="v2-v1"><span class="ctrl-val" id="v2-v1-out">3.0</span></div>
+    <div class="ctrl-row"><span class="ctrl-lbl">v²</span><input type="range" min="-3" max="3" value="1" step="0.1" id="v2-v2"><span class="ctrl-val" id="v2-v2-out">1.0</span></div>
+    <div class="formula-strip" id="v2-eq">ω(v) = 5.00</div>
+    <div class="readouts">
+      <div class="readout"><div class="readout-lbl">ω(v) · lines pierced</div><div class="readout-val" id="v2-result">5.00</div></div>
+      <div class="readout"><div class="readout-lbl">spacing 1/‖ω‖</div><div class="readout-val" id="v2-spacing">0.45</div></div>
+    </div>
+  </div>
+  <div class="notes" data-key="notes-covectors"><div class="notes-head">Your notes</div><textarea placeholder="The mental picture you find most stable. Examples from your own field."></textarea><div class="saved"></div></div>
+</section>
+
+<section class="chapter" id="metric">
+  <div class="ch-num">§ 5 · The metric tensor</div>
+  <h2>Where length, angle, and signature come from.</h2>
+  <p class="lede">The metric pairs two vectors to produce a number. Lengths, angles, raising and lowering of indices, and the gravitational field in GR all live in $g_{ij}$.</p>
+  <div class="tag-row">
+    <span class="tag metric">rank (0,2)</span>
+    <span class="tag metric">symmetric</span>
+    <span class="tag metric">nondegenerate</span>
+  </div>
+  <div class="def metric-flavor">
+    <div class="def-label">Definition</div>
+    <div class="def-name">Metric tensor $g$</div>
+    <p>A map $g : V \times V \to \mathbb{R}$ that is bilinear, symmetric ($g(u,v) = g(v,u)$), and nondegenerate ($g(u,v)=0\;\forall v \Rightarrow u=0$).</p>
+    <p>Components: $g_{ij} := g(e_i, e_j)$. For any $u, v$: $g(u,v) = g_{ij} u^i v^j$.</p>
+  </div>
+  <h3>What the components mean</h3>
+  <ul class="clean">
+    <li>$\|v\|^2 = g_{ij} v^i v^j$. In 2D: $g_{11}(v^1)^2 + 2g_{12}v^1v^2 + g_{22}(v^2)^2$. The factor of 2 is not a typo.</li>
+    <li>Diagonal $g_{ii}$ = squared length of $e_i$. Off-diagonal $g_{ij}$ = $\|e_i\|\|e_j\|\cos\theta_{ij}$: basis skew.</li>
+    <li>$e_1 \perp e_2 \iff g_{12} = 0$.</li>
+  </ul>
+  <div class="callout-warn">Off-diagonal entries contribute. Always expand the full double sum $g_{ij}v^iv^j$ — all four terms in 2D, all nine in 3D.</div>
+  <h3>Examples</h3>
+  <p><strong>Euclidean:</strong> $g_{ij} = \delta_{ij}$. <strong>Minkowski (SR):</strong> $\eta_{\mu\nu} = \mathrm{diag}(-1,+1,+1,+1)$. One minus sign: all of causality. <strong>Schwarzschild (GR):</strong> $g_{\mu\nu}$ depends on $r$ — that position-dependence is gravity.</p>
+  <h3>Raising and lowering</h3>
+  <p>$v_i := g_{ij} v^j$ (lower). $v^i := g^{ij} v_j$ (raise), where $g^{ij} g_{jk} = \delta^i{}_k$. In Cartesian Euclidean coordinates this changes nothing numerically. Everywhere else it does.</p>
+  <div class="remember">$\det g > 0$: Riemannian geometry. $\det g = 0$: degenerate, not a metric. $\det g < 0$ or mixed signs: Lorentzian — spacetime, light cones.</div>
+  <div class="viz" id="viz-3">
+    <h4>Visualization 3 · Unit "circle" of the metric</h4>
+    <p class="viz-cap">Locus $\{v : g_{ij}v^iv^j = 1\}$. Purple = this metric. Dashed = Euclidean reference.</p>
+    <svg id="v3-svg" viewBox="0 0 460 360"></svg>
+    <div class="ctrl-row"><span class="ctrl-lbl">g₁₁</span><input type="range" min="0.2" max="4" value="1" step="0.1" id="v3-g11"><span class="ctrl-val" id="v3-g11-out">1.0</span></div>
+    <div class="ctrl-row"><span class="ctrl-lbl">g₂₂</span><input type="range" min="0.2" max="4" value="1" step="0.1" id="v3-g22"><span class="ctrl-val" id="v3-g22-out">1.0</span></div>
+    <div class="ctrl-row"><span class="ctrl-lbl">g₁₂ = g₂₁</span><input type="range" min="-2" max="2" value="0" step="0.1" id="v3-g12"><span class="ctrl-val" id="v3-g12-out">0.0</span></div>
+    <div class="readouts">
+      <div class="readout"><div class="readout-lbl">‖e₁‖ = √g₁₁</div><div class="readout-val" id="v3-e1">1.00</div></div>
+      <div class="readout"><div class="readout-lbl">‖e₂‖ = √g₂₂</div><div class="readout-val" id="v3-e2">1.00</div></div>
+      <div class="readout"><div class="readout-lbl">∠(e₁, e₂)</div><div class="readout-val" id="v3-ang">90.0°</div></div>
+      <div class="readout"><div class="readout-lbl">det g</div><div class="readout-val" id="v3-det">1.00</div></div>
+    </div>
+    <div class="warn-strip" id="v3-warn" style="display:none;"></div>
+  </div>
+  <div class="notes" data-key="notes-metric"><div class="notes-head">Your notes</div><textarea placeholder="Specific metrics you want to remember. Conditions on signature."></textarea><div class="saved"></div></div>
+</section>
+
+<section class="chapter" id="products">
+  <div class="ch-num">§ 6 · Tensor products and rank</div>
+  <h2>Building higher-rank tensors from vectors and covectors.</h2>
+  <p class="lede">A rank-$(p,q)$ tensor is a multilinear map eating $p$ covectors and $q$ vectors and returning a real number.</p>
+  <div class="def">
+    <div class="def-label">Definition</div>
+    <div class="def-name">Rank-$(p, q)$ tensor</div>
+    <p>$T : \underbrace{V^* \times \cdots}_{p} \times \underbrace{V \times \cdots}_{q} \to \mathbb{R},$ multilinear. Components: $T^{i_1\cdots i_p}{}_{j_1 \cdots j_q}$. Dimension: $n^{p+q}$.</p>
+  </div>
+  <h3>The cast, recategorized</h3>
+  <ul class="clean">
+    <li>Scalar = rank $(0,0)$. &nbsp; Vector $v^i$ = rank $(1,0)$. &nbsp; Covector $\omega_i$ = rank $(0,1)$.</li>
+    <li>Metric $g_{ij}$ = rank $(0,2)$, symmetric. &nbsp; Inverse metric $g^{ij}$ = rank $(2,0)$.</li>
+    <li>Linear map $L^i{}_j$ = rank $(1,1)$. Every matrix is a tensor.</li>
+    <li>Stress, strain, electromagnetic field, Riemann curvature: higher-rank with specific symmetries.</li>
+  </ul>
+  <h3>Tensor product $\otimes$ and transformation law</h3>
+  <p>$(v \otimes w)^{ij} := v^i w^j$. Product of ranks $(p_1,q_1)$ and $(p_2,q_2)$ gives rank $(p_1+p_2, q_1+q_2)$. Non-commutative: $v\otimes w \neq w\otimes v$.</p>
+  <p>Any rank-$(p,q)$ tensor decomposes: $T = T^{ij} e_i \otimes e_j$ (summed). The transformation law:</p>
+  <p>$$\tilde T^{i_1\cdots i_p}{}_{j_1\cdots j_q} = (M^{-1})^{i_1}{}_{k_1}\cdots M^{l_1}{}_{j_1}\cdots T^{k_1\cdots}{}_{l_1\cdots}.$$</p>
+  <p>Each upper index: factor of $M^{-1}$. Each lower index: factor of $M$.</p>
+  <div class="viz" id="viz-4">
+    <h4>Visualization 4 · The outer product</h4>
+    <p class="viz-cap">$(v\otimes w)^{ij} = v^i w^j$. Adjust $v, w$; observe the $2\times2$ component grid.</p>
+    <svg id="v4-svg" viewBox="0 0 460 240"></svg>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;">
+      <div>
+        <div class="ctrl-row"><span class="ctrl-lbl">v¹</span><input type="range" min="-3" max="3" value="2" step="0.1" id="v4-v1"><span class="ctrl-val" id="v4-v1-out">2.0</span></div>
+        <div class="ctrl-row"><span class="ctrl-lbl">v²</span><input type="range" min="-3" max="3" value="1" step="0.1" id="v4-v2"><span class="ctrl-val" id="v4-v2-out">1.0</span></div>
+      </div>
+      <div>
+        <div class="ctrl-row"><span class="ctrl-lbl">w¹</span><input type="range" min="-3" max="3" value="1" step="0.1" id="v4-w1"><span class="ctrl-val" id="v4-w1-out">1.0</span></div>
+        <div class="ctrl-row"><span class="ctrl-lbl">w²</span><input type="range" min="-3" max="3" value="3" step="0.1" id="v4-w2"><span class="ctrl-val" id="v4-w2-out">3.0</span></div>
+      </div>
+    </div>
+    <div class="formula-strip">(v ⊗ w)<sup>ij</sup> = v<sup>i</sup> w<sup>j</sup></div>
+    <div style="display:grid; grid-template-columns:auto auto auto; gap:8px; justify-content:center; align-items:center; margin-top:16px; font-family:var(--mono);">
+      <div></div>
+      <div style="font-size:12px; color:var(--text-muted); text-align:center;">j = 1</div>
+      <div style="font-size:12px; color:var(--text-muted); text-align:center;">j = 2</div>
+      <div style="font-size:12px; color:var(--text-muted); text-align:right; padding-right:6px;">i = 1</div>
+      <div class="readout" style="text-align:center;"><div class="readout-val" id="v4-11">2.00</div></div>
+      <div class="readout" style="text-align:center;"><div class="readout-val" id="v4-12">6.00</div></div>
+      <div style="font-size:12px; color:var(--text-muted); text-align:right; padding-right:6px;">i = 2</div>
+      <div class="readout" style="text-align:center;"><div class="readout-val" id="v4-21">1.00</div></div>
+      <div class="readout" style="text-align:center;"><div class="readout-val" id="v4-22">3.00</div></div>
+    </div>
+  </div>
+  <div class="notes" data-key="notes-products"><div class="notes-head">Your notes</div><textarea placeholder="The map from object to indices. What kind of tensor is each thing you've met."></textarea><div class="saved"></div></div>
+</section>
+
+<section class="chapter" id="contraction">
+  <div class="ch-num">§ 7 · Contraction</div>
+  <h2>The rank-lowering operation that produces invariants.</h2>
+  <p class="lede">Set one upper and one lower index equal and sum. Rank falls by $(1,1)$; invariance is preserved.</p>
+  <div class="def">
+    <div class="def-label">Definition</div>
+    <div class="def-name">Contraction</div>
+    <p>For $T^i{}_j$: contraction is $T^i{}_i = \sum_i T^i{}_i$. A rank-$(p,q)$ tensor contracts to rank-$(p-1,q-1)$.</p>
+  </div>
+  <h3>Why it is invariant</h3>
+  <p>Transformation law: $\tilde T^i{}_i = (M^{-1})^i{}_k M^l{}_i T^k{}_l$. The shared index $i$ assembles $M M^{-1} = I$: $\delta^l{}_k T^k{}_l = T^k{}_k$. The basis-change matrices annihilate each other.</p>
+  <div class="remember">The trace of a matrix is basis-invariant because it is a tensor contraction. This is the same theorem.</div>
+  <h3>Things that are secretly contractions</h3>
+  <ul class="clean">
+    <li>Pairing: $\omega_i v^i$. &nbsp; Dot product: $g_{ij} u^i v^j$. &nbsp; Trace: $L^i{}_i$.</li>
+    <li>Divergence: $\partial_i v^i$. &nbsp; Laplacian: $g^{ij}\partial_i\partial_j f$. &nbsp; Ricci scalar: $g^{ij}R_{ij}$.</li>
+    <li>Raising/lowering: $v_i = g_{ij}v^j$ and $v^i = g^{ij}v_j$ are each a product with the metric followed by contraction.</li>
+  </ul>
+  <h3>The whole algebra in three moves</h3>
+  <div class="three-ops">
+    <div class="op-card"><div class="op-name">Tensor product</div><div class="op-desc">Combine two tensors. Ranks add. Indices concatenate.</div></div>
+    <div class="op-card"><div class="op-name">Contraction</div><div class="op-desc">Pair one upper with one lower, sum. Ranks decrease. Produces invariants.</div></div>
+    <div class="op-card"><div class="op-name">Linear combination</div><div class="op-desc">Add same-rank tensors. Scale by scalars.</div></div>
+  </div>
+  <div class="notes" data-key="notes-contraction"><div class="notes-head">Your notes</div><textarea placeholder="Operations you want to recognize at a glance. What else is secretly a contraction?"></textarea><div class="saved"></div></div>
+</section>
+
+<section class="chapter" id="whatnext">
+  <div class="ch-num">§ 8 · What comes next</div>
+  <h2>From a point to a field, from algebra to geometry.</h2>
+  <p class="lede">Everything above lives at a single point. Two directions from here.</p>
+  <h3>Branch B · symmetries and applied tensors</h3>
+  <p>Any rank-2 tensor splits into: a trace, a symmetric traceless part, and an antisymmetric part — volume change, shape change, rotation. Eigenvalues reappear as principal axes of stress and strain. Specific tensors: stress, strain, moment of inertia, electromagnetic field $F_{\mu\nu}$.</p>
+  <h3>Branch A · manifolds and curvature</h3>
+  <p>Tensor fields vary from point to point. Partial derivatives of tensors fail the transformation law — the basis varies with position. The covariant derivative fixes this via Christoffel symbols. Non-commuting covariant derivatives give the Riemann curvature tensor. Then geodesics, Ricci tensor, Einstein's field equations.</p>
+  <p>Both branches use exactly the algebra in this notebook.</p>
+</section>
+
+<section class="chapter" id="refs">
+  <div class="ch-num">§ 9 · References</div>
+  <h2>Where to read next.</h2>
+  <p class="lede">Curated and annotated. Tiered by readiness and goal.</p>
+  <h3>Re-entry tier</h3>
+  <ul class="refs">
+    <li><span class="ref-title">Daniel Fleisch · <em>A Student's Guide to Vectors and Tensors</em></span><span class="ref-note">Gentlest serious treatment. Slow pacing, worked examples, careful with upper/lower indices. A companion to this notebook.</span></li>
+    <li><span class="ref-title">eigenchris · <em>Tensors for Beginners</em> and <em>Tensor Calculus</em> (YouTube, free)</span><span class="ref-note">High-quality visual explanations. The stacks-of-surfaces picture of one-forms is canonical. Follow with the Relativity playlist.</span></li>
+    <li><span class="ref-title">James Hartle · <em>Gravity: An Introduction to Einstein's General Relativity</em></span><span class="ref-note">Physics-first GR. Geodesics and black holes before full tensor machinery.</span></li>
+  </ul>
+  <h3>Standard graduate tier</h3>
+  <ul class="refs">
+    <li><span class="ref-title">Bernard Schutz · <em>A First Course in General Relativity</em> (2nd ed., Cambridge)</span><span class="ref-note">Most widely assigned intro GR textbook. Tensors as the linguistic core.</span></li>
+    <li><span class="ref-title">Sean Carroll · <em>Spacetime and Geometry</em> · free notes: arXiv gr-qc/9712019</span><span class="ref-note">Modern and conversational. The free notes are ~80% of the book. Best single free comprehensive GR resource.</span></li>
+    <li><span class="ref-title">Theodore Frankel · <em>The Geometry of Physics</em> (3rd ed., Cambridge)</span><span class="ref-note">Strongest recommendation for broad use. Tensors, forms, manifolds, fiber bundles, applied to mechanics, EM, GR, gauge theory, thermodynamics.</span></li>
+  </ul>
+  <h3>Definitive references</h3>
+  <ul class="refs">
+    <li><span class="ref-title">Misner, Thorne, Wheeler · <em>Gravitation</em> (Princeton)</span><span class="ref-note">The encyclopedia. Two-track depth structure. Source of the "machine with slots" picture.</span></li>
+    <li><span class="ref-title">Robert Wald · <em>General Relativity</em></span><span class="ref-note">More mathematically careful than MTW. Standard for abstract-index formulation.</span></li>
+    <li><span class="ref-title">John M. Lee · <em>Introduction to Smooth Manifolds</em> (Springer GTM)</span><span class="ref-note">Clean mathematical foundation for Branch A. Pair with Introduction to Riemannian Manifolds for curvature.</span></li>
+    <li><span class="ref-title">Michael Spivak · <em>A Comprehensive Introduction to Differential Geometry</em> (5 vols)</span><span class="ref-note">Idiosyncratic, beautiful, deep. Volume 1 covers the foundations.</span></li>
+  </ul>
+  <h3>Continuum mechanics direction</h3>
+  <ul class="refs">
+    <li><span class="ref-title">Morton Gurtin · <em>An Introduction to Continuum Mechanics</em></span><span class="ref-note">Cleanest mathematically. Tensors as linear maps, notation kept honest.</span></li>
+    <li><span class="ref-title">Lawrence Malvern · <em>Introduction to the Mechanics of a Continuous Medium</em></span><span class="ref-note">The classic. Encyclopedic.</span></li>
+    <li><span class="ref-title">Gerhard Holzapfel · <em>Nonlinear Solid Mechanics</em></span><span class="ref-note">Modern, computational. Beloved by the engineering community.</span></li>
+  </ul>
+  <h3>Intuition and the wider view</h3>
+  <ul class="refs">
+    <li><span class="ref-title">Roger Penrose · <em>The Road to Reality</em></span><span class="ref-note">Massive but readable. Excellent geometric intuition for tensors, fibre bundles, curvature.</span></li>
+    <li><span class="ref-title">Tristan Needham · <em>Visual Differential Geometry and Forms</em> (2021)</span><span class="ref-note">Every concept introduced visually before symbolically. Companion in spirit to this notebook.</span></li>
+  </ul>
+  <h3>Free online</h3>
+  <ul class="refs">
+    <li><span class="ref-title">David Tong · lecture notes (damtp.cam.ac.uk/user/tong/teaching.html)</span><span class="ref-note">GR, classical dynamics, electromagnetism. Beautifully written.</span></li>
+    <li><span class="ref-title">MIT OCW 8.962, Scott Hughes · <em>General Relativity</em></span><span class="ref-note">Full graduate course, video lectures and notes.</span></li>
+  </ul>
+  <div class="remember">Start with Fleisch for index notation, eigenchris for the visuals, then commit to Frankel's Geometry of Physics as the main text. Carroll's free notes alongside for GR depth.</div>
+</section>
+
+<footer class="coda">
+  Written together, May 2026. Re-derive everything in your own hand at least once. That is when the indices become yours.
+</footer>
+
+</main>
+</div>
+
+<script>
+(function(){
+function setupNotes(){
+  document.querySelectorAll('.notes').forEach(n => {
+    const key = 'tensorbook:' + n.dataset.key;
+    const ta = n.querySelector('textarea');
+    const saved = n.querySelector('.saved');
+    try { const v = localStorage.getItem(key); if (v) ta.value = v; } catch(e) {}
+    let t;
+    ta.addEventListener('input', () => {
+      clearTimeout(t);
+      t = setTimeout(() => {
+        try { localStorage.setItem(key, ta.value); saved.textContent = 'Saved ' + new Date().toLocaleTimeString(); }
+        catch(e) { saved.textContent = 'Could not save.'; }
+      }, 400);
+    });
+  });
+}
+function setupTocActive(){
+  const links = document.querySelectorAll('aside.toc a');
+  const sections = Array.from(links).map(a => document.querySelector(a.getAttribute('href')));
+  function onScroll(){
+    const top = window.scrollY + 120; let cur = 0;
+    sections.forEach((s,i) => { if (s && s.offsetTop <= top) cur = i; });
+    links.forEach((l,i) => l.classList.toggle('active', i===cur));
+  }
+  window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+}
+function viz1(){
+  const svg = document.getElementById('v1-svg');
+  const W=460,H=320,cx=W/2,cy=H/2,sc=42,vx=3,vy=2;
+  function draw(){
+    const th=parseFloat(document.getElementById('v1-theta').value)*Math.PI/180;
+    const c=Math.cos(th),s=Math.sin(th);
+    const e1={x:c,y:s},e2={x:-s,y:c};
+    const v1=vx*e1.x+vy*e1.y,v2=vx*e2.x+vy*e2.y;
+    document.getElementById('v1-theta-out').textContent=(th*180/Math.PI).toFixed(0)+'°';
+    document.getElementById('v1-c1').textContent=v1.toFixed(2);
+    document.getElementById('v1-c2').textContent=v2.toFixed(2);
+    document.getElementById('v1-len').textContent=Math.sqrt(vx*vx+vy*vy).toFixed(2);
+    document.getElementById('v1-dir').textContent=(Math.atan2(vy,vx)*180/Math.PI).toFixed(1)+'°';
+    document.getElementById('v1-eq').textContent='v = '+v1.toFixed(2)+' e₁ + '+v2.toFixed(2)+' e₂';
+    const tX=cx+vx*sc,tY=cy-vy*sc,e1X=cx+e1.x*sc,e1Y=cy-e1.y*sc,e2X=cx+e2.x*sc,e2Y=cy-e2.y*sc;
+    const a1X=cx+v1*e1.x*sc,a1Y=cy-v1*e1.y*sc,a2X=a1X+v2*e2.x*sc,a2Y=a1Y-v2*e2.y*sc;
+    let g='';
+    for(let i=-5;i<=5;i++){if(!i)continue;g+='<line x1="'+(cx+i*sc)+'" y1="0" x2="'+(cx+i*sc)+'" y2="'+H+'" stroke="#D8CCB1" stroke-width="0.5"/>';}
+    for(let i=-3;i<=3;i++){if(!i)continue;g+='<line x1="0" y1="'+(cy+i*sc)+'" x2="'+W+'" y2="'+(cy+i*sc)+'" stroke="#D8CCB1" stroke-width="0.5"/>';}
+    svg.innerHTML=`<defs><marker id="m1v" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5B2D81"/></marker><marker id="m1e" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#155E45"/></marker><marker id="m1c" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8A7A66"/></marker></defs>${g}<line x1="0" y1="${cy}" x2="${W}" y2="${cy}" stroke="#8A7A66" stroke-width="1"/><line x1="${cx}" y1="0" x2="${cx}" y2="${H}" stroke="#8A7A66" stroke-width="1"/><line x1="${cx}" y1="${cy}" x2="${a1X}" y2="${a1Y}" stroke="#8A7A66" stroke-width="2" marker-end="url(#m1c)"/><line x1="${a1X}" y1="${a1Y}" x2="${a2X}" y2="${a2Y}" stroke="#8A7A66" stroke-width="2" marker-end="url(#m1c)"/><line x1="${cx}" y1="${cy}" x2="${e1X}" y2="${e1Y}" stroke="#155E45" stroke-width="2.5" marker-end="url(#m1e)"/><line x1="${cx}" y1="${cy}" x2="${e2X}" y2="${e2Y}" stroke="#155E45" stroke-width="2.5" marker-end="url(#m1e)"/><text x="${e1X+8}" y="${e1Y-4}" font-size="13" fill="#155E45" font-family="monospace">e₁</text><text x="${e2X+8}" y="${e2Y-4}" font-size="13" fill="#155E45" font-family="monospace">e₂</text><line x1="${cx}" y1="${cy}" x2="${tX}" y2="${tY}" stroke="#5B2D81" stroke-width="3" marker-end="url(#m1v)"/><text x="${tX+10}" y="${tY-6}" font-size="16" fill="#5B2D81" font-weight="500" font-family="monospace">v</text>`;
+  }
+  document.getElementById('v1-theta').addEventListener('input',draw); draw();
+}
+function viz2(){
+  const svg=document.getElementById('v2-svg');
+  const W=460,H=340,cx=W/2,cy=H/2,sc=36;
+  function draw(){
+    const w1=parseFloat(document.getElementById('v2-w1').value),w2=parseFloat(document.getElementById('v2-w2').value);
+    const v1=parseFloat(document.getElementById('v2-v1').value),v2=parseFloat(document.getElementById('v2-v2').value);
+    ['v2-w1-out','v2-w2-out','v2-v1-out','v2-v2-out'].forEach((id,i)=>document.getElementById(id).textContent=[w1,w2,v1,v2][i].toFixed(1));
+    const wM=Math.sqrt(w1*w1+w2*w2),oV=w1*v1+w2*v2;
+    document.getElementById('v2-eq').textContent='ω(v) = ('+w1.toFixed(1)+')('+v1.toFixed(1)+') + ('+w2.toFixed(1)+')('+v2.toFixed(1)+') = '+oV.toFixed(2);
+    document.getElementById('v2-result').textContent=oV.toFixed(2);
+    document.getElementById('v2-spacing').textContent=wM>0.05?(1/wM).toFixed(2):'∞';
+    let lines='';
+    if(wM>0.05){const px=-w2/wM,py=w1/wM,ext=9,N=Math.min(12,Math.ceil(8*wM)+2);
+      for(let k=-N;k<=N;k++){const ax=k*w1/(wM*wM),ay=k*w2/(wM*wM);
+        const x1s=cx+(ax-ext*px)*sc,y1s=cy-(ay-ext*py)*sc,x2s=cx+(ax+ext*px)*sc,y2s=cy-(ay+ext*py)*sc;
+        const stroke=k===0?'#3A2D1F':'#8A7A66',sw=k===0?1.4:0.7;
+        lines+='<line x1="'+x1s+'" y1="'+y1s+'" x2="'+x2s+'" y2="'+y2s+'" stroke="'+stroke+'" stroke-width="'+sw+'"/>';
+        if(k&&Math.abs(k)<=8)lines+='<text x="'+(cx+(ax+0.15*px)*sc+4)+'" y="'+(cy-(ay+0.15*py)*sc-4)+'" font-size="10" fill="#6B5A48" font-family="monospace">'+k+'</text>';
+      }
+    }
+    const tX=cx+v1*sc,tY=cy-v2*sc,wX=cx+(w1/Math.max(wM,0.01))*0.7*sc,wY=cy-(w2/Math.max(wM,0.01))*0.7*sc;
+    svg.innerHTML='<defs><marker id="m2v" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5B2D81"/></marker><marker id="m2w" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#155E45"/></marker></defs>'+lines+'<line x1="'+cx+'" y1="'+cy+'" x2="'+wX+'" y2="'+wY+'" stroke="#155E45" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#m2w)"/><text x="'+(wX+6)+'" y="'+(wY-4)+'" font-size="11" fill="#155E45" font-family="monospace">ω</text><line x1="'+cx+'" y1="'+cy+'" x2="'+tX+'" y2="'+tY+'" stroke="#5B2D81" stroke-width="3" marker-end="url(#m2v)"/><text x="'+(tX+8)+'" y="'+(tY-6)+'" font-size="14" fill="#5B2D81" font-weight="500" font-family="monospace">v</text><circle cx="'+cx+'" cy="'+cy+'" r="3" fill="#3A2D1F"/>';
+  }
+  ['v2-w1','v2-w2','v2-v1','v2-v2'].forEach(id=>document.getElementById(id).addEventListener('input',draw)); draw();
+}
+function viz3(){
+  const svg=document.getElementById('v3-svg');
+  const W=460,H=360,cx=W/2,cy=H/2,sc=70;
+  function draw(){
+    const g11=parseFloat(document.getElementById('v3-g11').value),g22=parseFloat(document.getElementById('v3-g22').value),g12=parseFloat(document.getElementById('v3-g12').value);
+    ['v3-g11-out','v3-g22-out','v3-g12-out'].forEach((id,i)=>document.getElementById(id).textContent=[g11,g22,g12][i].toFixed(1));
+    const det=g11*g22-g12*g12,e1l=Math.sqrt(g11),e2l=Math.sqrt(g22);
+    const ang=Math.acos(Math.max(-1,Math.min(1,g12/(e1l*e2l))))*180/Math.PI;
+    document.getElementById('v3-e1').textContent=e1l.toFixed(2);
+    document.getElementById('v3-e2').textContent=e2l.toFixed(2);
+    document.getElementById('v3-ang').textContent=ang.toFixed(1)+'°';
+    document.getElementById('v3-det').textContent=det.toFixed(2);
+    const warn=document.getElementById('v3-warn');
+    warn.style.display=det<=0.001?'block':'none';
+    if(det<=0.001)warn.textContent='det g ≤ 0 — fails nondegeneracy as a Riemannian metric.';
+    let ellipse='';
+    if(det>0.001){const pts=[];
+      for(let i=0;i<=240;i++){const t=(i/240)*2*Math.PI,c=Math.cos(t),s=Math.sin(t);
+        const d=g11*c*c+2*g12*c*s+g22*s*s;if(d>0){const r=1/Math.sqrt(d);pts.push((cx+r*c*sc).toFixed(2)+','+(cy-r*s*sc).toFixed(2));}}
+      ellipse='<polygon points="'+pts.join(' ')+'" fill="none" stroke="#5B2D81" stroke-width="2"/>';
+    }
+    const refPts=[];for(let i=0;i<=60;i++){const t=(i/60)*2*Math.PI;refPts.push((cx+Math.cos(t)*sc).toFixed(2)+','+(cy-Math.sin(t)*sc).toFixed(2));}
+    let g='';
+    for(let i=-3;i<=3;i++){if(!i)continue;g+='<line x1="'+(cx+i*sc*0.5)+'" y1="0" x2="'+(cx+i*sc*0.5)+'" y2="'+H+'" stroke="#D8CCB1" stroke-width="0.5"/><line x1="0" y1="'+(cy+i*sc*0.5)+'" x2="'+W+'" y2="'+(cy+i*sc*0.5)+'" stroke="#D8CCB1" stroke-width="0.5"/>';}
+    svg.innerHTML='<defs><marker id="m3a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#155E45"/></marker></defs>'+g+'<line x1="0" y1="'+cy+'" x2="'+W+'" y2="'+cy+'" stroke="#8A7A66" stroke-width="1"/><line x1="'+cx+'" y1="0" x2="'+cx+'" y2="'+H+'" stroke="#8A7A66" stroke-width="1"/><polygon points="'+refPts.join(' ')+'" fill="none" stroke="#8A7A66" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.6"/>'+ellipse+'<line x1="'+cx+'" y1="'+cy+'" x2="'+(cx+sc)+'" y2="'+cy+'" stroke="#155E45" stroke-width="2.5" marker-end="url(#m3a)"/><line x1="'+cx+'" y1="'+cy+'" x2="'+cx+'" y2="'+(cy-sc)+'" stroke="#155E45" stroke-width="2.5" marker-end="url(#m3a)"/><text x="'+(cx+sc+8)+'" y="'+(cy-4)+'" font-size="13" fill="#155E45" font-family="monospace">e₁</text><text x="'+(cx+8)+'" y="'+(cy-sc-4)+'" font-size="13" fill="#155E45" font-family="monospace">e₂</text><circle cx="'+cx+'" cy="'+cy+'" r="3" fill="#3A2D1F"/><text x="14" y="22" font-size="11" fill="#6B5A48" font-family="monospace">purple: unit circle of g / dashed: Euclidean</text>';
+  }
+  ['v3-g11','v3-g22','v3-g12'].forEach(id=>document.getElementById(id).addEventListener('input',draw)); draw();
+}
+function viz4(){
+  const svg=document.getElementById('v4-svg');
+  const W=460,H=240,cx=W/2,cy=H/2,sc=32;
+  function draw(){
+    const v1=parseFloat(document.getElementById('v4-v1').value),v2=parseFloat(document.getElementById('v4-v2').value);
+    const w1=parseFloat(document.getElementById('v4-w1').value),w2=parseFloat(document.getElementById('v4-w2').value);
+    ['v4-v1-out','v4-v2-out','v4-w1-out','v4-w2-out'].forEach((id,i)=>document.getElementById(id).textContent=[v1,v2,w1,w2][i].toFixed(1));
+    ['v4-11','v4-12','v4-21','v4-22'].forEach((id,i)=>document.getElementById(id).textContent=[[v1*w1,v1*w2],[v2*w1,v2*w2]][Math.floor(i/2)][i%2].toFixed(2));
+    const vX=cx+v1*sc,vY=cy-v2*sc,wX=cx+w1*sc,wY=cy-w2*sc;
+    let g='';
+    for(let i=-4;i<=4;i++){if(!i)continue;g+='<line x1="'+(cx+i*sc)+'" y1="0" x2="'+(cx+i*sc)+'" y2="'+H+'" stroke="#D8CCB1" stroke-width="0.5"/>';}
+    for(let i=-3;i<=3;i++){if(!i)continue;g+='<line x1="0" y1="'+(cy+i*sc)+'" x2="'+W+'" y2="'+(cy+i*sc)+'" stroke="#D8CCB1" stroke-width="0.5"/>';}
+    svg.innerHTML='<defs><marker id="m4v" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5B2D81"/></marker><marker id="m4w" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#155E45"/></marker></defs>'+g+'<line x1="0" y1="'+cy+'" x2="'+W+'" y2="'+cy+'" stroke="#8A7A66" stroke-width="1"/><line x1="'+cx+'" y1="0" x2="'+cx+'" y2="'+H+'" stroke="#8A7A66" stroke-width="1"/><line x1="'+cx+'" y1="'+cy+'" x2="'+vX+'" y2="'+vY+'" stroke="#5B2D81" stroke-width="3" marker-end="url(#m4v)"/><text x="'+(vX+8)+'" y="'+(vY-6)+'" font-size="14" fill="#5B2D81" font-weight="500" font-family="monospace">v</text><line x1="'+cx+'" y1="'+cy+'" x2="'+wX+'" y2="'+wY+'" stroke="#155E45" stroke-width="3" marker-end="url(#m4w)"/><text x="'+(wX+8)+'" y="'+(wY-6)+'" font-size="14" fill="#155E45" font-weight="500" font-family="monospace">w</text><circle cx="'+cx+'" cy="'+cy+'" r="3" fill="#3A2D1F"/>';
+  }
+  ['v4-v1','v4-v2','v4-w1','v4-w2'].forEach(id=>document.getElementById(id).addEventListener('input',draw)); draw();
+}
+document.addEventListener('DOMContentLoaded',()=>{setupNotes();setupTocActive();viz1();viz2();viz3();viz4();});
+})();
+</script>
+</body>
+</html>
