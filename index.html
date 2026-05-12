@@ -88,7 +88,7 @@ section.chapter p + p { margin-top: 0; }
 .viz .ctrl-val { min-width: 52px; text-align: right; }
 .viz .ctrl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 14px; }
 .viz input[type="range"] { min-width: 0; flex: 1; }
-.katex-display { overflow-x: auto; overflow-y: hidden; padding-bottom: 4px; }
+.katex-display { overflow-x: auto; padding-bottom: 4px; }
 .viz input[type=range] { flex: 1; height: 4px; -webkit-appearance: none; appearance: none; background: var(--border-soft); border-radius: 2px; outline: none; }
 .viz input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--vec); cursor: pointer; border: 2px solid var(--bg-card); }
 .viz input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--vec); cursor: pointer; border: 2px solid var(--bg-card); }
@@ -462,7 +462,7 @@ ul.refs a:hover { border-bottom-color: var(--vec); }
   <div class="example">
     <div class="ex-label">Worked example &middot; simple shear</div>
     <p>Field \(v^x = y,\ v^y = 0\). The arrows above the \(x\)-axis point right, below point left, magnitudes proportional to \(|y|\).</p>
-    <p>\[L = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}, \quad D = \begin{pmatrix} 0 & \tfrac{1}{2} \\ \tfrac{1}{2} & 0 \end{pmatrix}, \quad W = \begin{pmatrix} 0 & \tfrac{1}{2} \\ -\tfrac{1}{2} & 0 \end{pmatrix}.\]</p>
+    <p>\[\begin{gathered} L = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix} \\[4pt] D = \begin{pmatrix} 0 & \tfrac{1}{2} \\ \tfrac{1}{2} & 0 \end{pmatrix} \\[4pt] W = \begin{pmatrix} 0 & \tfrac{1}{2} \\ -\tfrac{1}{2} & 0 \end{pmatrix}. \end{gathered}\]</p>
     <p>The off-diagonal-only structure of \(D\) says the principal stretch axes are at 45&deg; (along \(y=x\) and \(y=-x\)). The single component of \(W\) is the angular velocity, clockwise. The same field both stretches and rotates a dropped circle, simultaneously.</p>
   </div>
 

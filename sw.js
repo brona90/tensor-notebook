@@ -1,4 +1,4 @@
-const CACHE = 'tensor-notebook-v3';
+const CACHE = 'tensor-notebook-v4';
 const PRECACHE = [
   './',
   './index.html',
