@@ -86,6 +86,9 @@ section.chapter p + p { margin-top: 0; }
 .viz .ctrl-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; font-family: var(--mono); font-size: 13px; }
 .viz .ctrl-lbl { min-width: 90px; color: var(--text-muted); }
 .viz .ctrl-val { min-width: 52px; text-align: right; }
+.viz .ctrl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 14px; }
+.viz input[type="range"] { min-width: 0; flex: 1; }
+.katex-display { overflow-x: auto; overflow-y: hidden; padding-bottom: 4px; }
 .viz input[type=range] { flex: 1; height: 4px; -webkit-appearance: none; appearance: none; background: var(--border-soft); border-radius: 2px; outline: none; }
 .viz input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--vec); cursor: pointer; border: 2px solid var(--bg-card); }
 .viz input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--vec); cursor: pointer; border: 2px solid var(--bg-card); }
@@ -131,6 +134,7 @@ ul.refs .ref-note { font-family: var(--serif); font-size: 16px; color: var(--tex
 ul.refs a { color: var(--vec); text-decoration: none; border-bottom: 1px solid var(--vec-soft); transition: border-color 0.2s; }
 ul.refs a:hover { border-bottom-color: var(--vec); }
 @media (max-width: 900px) { .layout { grid-template-columns: 1fr; gap: 0; padding: 32px 22px 80px; } aside.toc { position: static; max-height: none; margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid var(--border); } header.title h1 { font-size: 44px; } section.chapter h2 { font-size: 30px; } body { font-size: 17px; } .three-ops { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .viz .ctrl-lbl { min-width: 56px; font-size: 12px; } .viz .ctrl-val { min-width: 42px; font-size: 12px; } .viz .matrix-pair { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -356,7 +360,7 @@ ul.refs a:hover { border-bottom-color: var(--vec); }
     <h4>Visualization 4 &middot; The outer product</h4>
     <p class="viz-cap">\((v\otimes w)^{ij} = v^i w^j\). Adjust \(v, w\); observe the 2&times;2 component grid.</p>
     <svg id="v4-svg" viewBox="0 0 460 240"></svg>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;">
+    <div class="ctrl-grid">
       <div>
         <div class="ctrl-row"><span class="ctrl-lbl">v&#185;</span><input type="range" min="-3" max="3" value="2" step="0.1" id="v4-v1"><span class="ctrl-val" id="v4-v1-out">2.0</span></div>
         <div class="ctrl-row"><span class="ctrl-lbl">v&#178;</span><input type="range" min="-3" max="3" value="1" step="0.1" id="v4-v2"><span class="ctrl-val" id="v4-v2-out">1.0</span></div>
@@ -494,7 +498,7 @@ ul.refs a:hover { border-bottom-color: var(--vec); }
     <h4>Visualization 5 &middot; Flow gradient &middot; L = D + W</h4>
     <p class="viz-cap">Adjust the four entries of \(L\). The purple shape is the unit circle deformed by the flow at time \(t\); dashed teal lines are the principal axes of \(D\) (directions of pure stretch). Gray arrows sample the velocity field \(\vec v = L\vec x\). When \(L\) is symmetric the antisymmetric part vanishes and the circle stretches without tilting.</p>
     <svg id="v5-svg" viewBox="0 0 460 360"></svg>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;">
+    <div class="ctrl-grid">
       <div>
         <div class="ctrl-row"><span class="ctrl-lbl">L&#185;&#8321;</span><input type="range" min="-2" max="2" value="0" step="0.1" id="v5-l11"><span class="ctrl-val" id="v5-l11-out">0.0</span></div>
         <div class="ctrl-row"><span class="ctrl-lbl">L&#185;&#8322;</span><input type="range" min="-2" max="2" value="1" step="0.1" id="v5-l12"><span class="ctrl-val" id="v5-l12-out">1.0</span></div>
