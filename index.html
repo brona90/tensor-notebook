@@ -151,7 +151,7 @@ ul.refs a:hover { border-bottom-color: var(--vec); }
     <li><a href="#products">Tensor products and rank</a></li>
     <li><a href="#contraction">Contraction</a></li>
     <li><a href="#decomposition">Symmetric&ndash;antisymmetric decomposition</a></li>
-    <li><a href="#whatnext">What comes next</a></li>
+    <li><a href="#three-way">Three-way decomposition</a></li>
     <li><a href="#refs">References</a></li>
   </ol>
 </aside>
@@ -538,15 +538,95 @@ ul.refs a:hover { border-bottom-color: var(--vec); }
   <div class="notes" data-key="notes-decomposition"><div class="notes-head">Your notes</div><textarea placeholder="The picture you find clearest. The example that makes the split inevitable."></textarea><div class="saved"></div></div>
 </section>
 
-<section class="chapter" id="whatnext">
-  <div class="ch-num">&sect; 9 &middot; What comes next</div>
-  <h2>From a point to a field, from algebra to geometry.</h2>
-  <p class="lede">The algebra you have so far lives at a single point. The natural next step is letting it vary smoothly across space.</p>
-  <h3>Branch B remainder &middot; the full decomposition</h3>
-  <p>The symmetric part of a rank-2 tensor splits further: trace (volume change, 1 component in any \(n\)) plus traceless symmetric part (shape change, \(n(n+1)/2 - 1\) components). Together with the antisymmetric part (rotation), this gives the canonical three-way decomposition: any rank-2 tensor = volume change + shape change + rotation. Eigenvalue analysis carries through to specific physical tensors: stress, strain, moment of inertia, electromagnetic field \(F_{\mu\nu}\).</p>
-  <h3>Branch A &middot; manifolds and curvature</h3>
-  <p>Tensor fields vary from point to point. Partial derivatives of tensors fail the transformation law &mdash; the basis varies with position. The covariant derivative fixes this via Christoffel symbols. Non-commuting covariant derivatives give the Riemann curvature tensor. Then geodesics, Ricci tensor, Einstein's field equations.</p>
-  <p>Both branches use exactly the algebra in this notebook.</p>
+<section class="chapter" id="three-way">
+  <div class="ch-num">&sect; 9 &middot; Three-way decomposition</div>
+  <h2>Volume, shape, rotation.</h2>
+  <p class="lede">The symmetric&ndash;antisymmetric split separates deformation from rotation. The symmetric piece splits further &mdash; into an isotropic trace part (volume change) and a traceless symmetric part (shape change). Three pieces, three independent geometric meanings.</p>
+
+  <div class="def">
+    <div class="def-label">Decomposition</div>
+    <p>For any rank-2 tensor \(L\) in \(n\) dimensions,</p>
+    <p>\[L = \underbrace{\tfrac{1}{n}(\mathrm{tr}\,L)\,I}_{\text{volume}} \;+\; \underbrace{\Bigl(D - \tfrac{1}{n}(\mathrm{tr}\,L)\,I\Bigr)}_{\text{shape (traceless symmetric)}} \;+\; \underbrace{W}_{\text{rotation (antisymmetric)}}.\]</p>
+    <p>The three pieces live in mutually orthogonal subspaces of the space of all rank-2 tensors. They cannot leak into each other.</p>
+  </div>
+
+  <h3>Component counts</h3>
+  <p>Refining \(n^2 = n(n+1)/2 + n(n-1)/2\) from &sect;8: the symmetric part splits further into 1 trace component and \(n(n+1)/2 - 1\) traceless components.</p>
+
+  <table class="count-tbl">
+    <thead>
+      <tr><th>Dim n</th><th>Volume</th><th>Shape</th><th>Rotation</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>2</td><td>1</td><td>2</td><td>1</td><td>4</td></tr>
+      <tr><td>3</td><td>1</td><td>5</td><td>3</td><td>9</td></tr>
+      <tr><td>4</td><td>1</td><td>9</td><td>6</td><td>16</td></tr>
+    </tbody>
+  </table>
+
+  <p>In 3D the five traceless-symmetric components are exactly what continuum mechanics calls the <em>deviatoric stress</em> &mdash; shape change without volume change. In incompressible flow only the shape and rotation pieces survive.</p>
+
+  <h3>Three pure cases</h3>
+  <p>The cleanest verification is to dial each piece alone and watch a small circle of fluid at the origin.</p>
+
+  <div class="example">
+    <div class="ex-label">Case 1 &middot; pure isotropic expansion</div>
+    <p>\[L = I = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}.\]</p>
+    <p>Trace \(=2\); both eigenvalues \(+1\), the entire plane is the eigenspace. No antisymmetric or traceless-symmetric part. Radius grows as \(e^t\), area as \(e^{2t}\); same shape, no rotation. The trace alone drives the geometry.</p>
+  </div>
+
+  <div class="example">
+    <div class="ex-label">Case 2 &middot; pure shape change</div>
+    <p>\[L = D = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}.\]</p>
+    <p>Trace \(=0\); eigenvalues \(\pm 1\) along \(\hat x\) and \(\hat y\). No volume change, no rotation. Circle stretches along \(\hat x\), compresses along \(\hat y\); area preserved.</p>
+  </div>
+
+  <div class="example">
+    <div class="ex-label">Case 3 &middot; pure rotation</div>
+    <p>\[L = W = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}.\]</p>
+    <p>Trace \(=0\) (forced &mdash; antisymmetric diagonals are zero). No real eigenvectors: \(\lambda^2 + 1 = 0\) gives \(\lambda = \pm i\). Rigid rotation at angular speed \(\omega = 1\); the circle does not deform.</p>
+  </div>
+
+  <div class="remember">Complex eigenvalues mean rotation. A real eigenvector is a direction the tensor preserves up to scaling; rotation preserves no real direction, so eigenvalues must escape to \(\pm i\omega\). The imaginary part <em>is</em> the angular speed. Every real antisymmetric matrix has purely imaginary eigenvalues.</div>
+
+  <h3>The trace, in three roles</h3>
+  <p>Several characterizations are all the same number:</p>
+  <ul class="clean">
+    <li><strong>Sum of eigenvalues.</strong> \(\mathrm{tr}\,L = \sum_i \lambda_i\). The coefficient of \(\lambda^{n-1}\) in the characteristic polynomial, in every dimension.</li>
+    <li><strong>Tensor contraction.</strong> \(\mathrm{tr}\,L = L^i{}_i\). The simplest invariant from a rank-(1,1) tensor &mdash; the &sect;7 move applied to one index pair.</li>
+    <li><strong>Divergence.</strong> \(L^i{}_i = \partial v^i/\partial x^i = \nabla \cdot \vec v\), the local rate of volume change per unit volume. For a small parcel, \(\dot V/V = \mathrm{tr}\,L\). The trace piece <em>is</em> the volume piece because the trace measures volume change by construction; the rest is what remains after that measurement is removed.</li>
+  </ul>
+
+  <p>Antisymmetric matrices have \(W^i{}_i = -W^i{}_i\), so \(\mathrm{tr}\,W = 0\) automatically. Rotation cannot carry volume change. Volume change lives in the trace, which lives in the symmetric part. Algebra and geometry agree.</p>
+
+  <h3>Worked example &middot; mixed</h3>
+  <div class="example">
+    <div class="ex-label">Worked example &middot; decomposing an arbitrary \(L\)</div>
+    <p>\[L = \begin{pmatrix} 3 & 1 \\ -1 & 1 \end{pmatrix}.\]</p>
+    <p>Step 1 &mdash; split into symmetric and antisymmetric parts:</p>
+    <p>\[D = \tfrac{1}{2}(L + L^T) = \begin{pmatrix} 3 & 0 \\ 0 & 1 \end{pmatrix}, \qquad W = \tfrac{1}{2}(L - L^T) = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}.\]</p>
+    <p>Step 2 &mdash; peel the trace off \(D\). Trace is \(3+1=4\), so the isotropic part is \(\tfrac{4}{2}I = 2I\):</p>
+    <p>\[D = \underbrace{\begin{pmatrix} 2 & 0 \\ 0 & 2 \end{pmatrix}}_{\text{volume}} + \underbrace{\begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}}_{\text{shape}}.\]</p>
+    <p>Full three-way decomposition:</p>
+    <p>\[L = \underbrace{\begin{pmatrix} 2 & 0 \\ 0 & 2 \end{pmatrix}}_{\nabla\cdot\vec v\,=\,4} + \underbrace{\begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}}_{\text{stretch } \hat x,\ \text{compress } \hat y} + \underbrace{\begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}}_{\omega\,=\,-1}.\]</p>
+    <p>Area grows as \(e^{4t}\); unit-rate principal stretches along the coordinate axes (the shape piece is already diagonal here); clockwise rigid rotation superposed at angular speed 1. Add the three matrices and recover \(L\) exactly.</p>
+  </div>
+
+  <h3>Summary</h3>
+  <table class="count-tbl">
+    <thead>
+      <tr><th>Piece</th><th>Algebraic form</th><th>Geometric content</th><th>Tiny circle</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Trace part</td><td>\(\tfrac{1}{n}(\mathrm{tr}\,L)\,I\)</td><td>Volume / divergence</td><td>Isotropic scale</td></tr>
+      <tr><td>Traceless symmetric</td><td>\(D - \tfrac{1}{n}(\mathrm{tr}\,L)\,I\)</td><td>Shape change</td><td>Ellipse, area fixed</td></tr>
+      <tr><td>Antisymmetric</td><td>\(W\)</td><td>Rotation</td><td>Rigid spin</td></tr>
+    </tbody>
+  </table>
+
+  <div class="remember">Hand any \(L\) to this algorithm and it returns three numbers (a divergence and two principal strain rates) plus a sign-and-magnitude for the rotation, plus two principal directions. That fully determines what an infinitesimal fluid parcel does at that point. The rest of continuum mechanics &mdash; stress, constitutive laws, inertia &mdash; builds on this scaffolding.</div>
+
+  <div class="notes" data-key="notes-three-way"><div class="notes-head">Your notes</div><textarea placeholder="The decomposition in your own hand. The mixed example you want to remember."></textarea><div class="saved"></div></div>
 </section>
 
 <section class="chapter" id="refs">

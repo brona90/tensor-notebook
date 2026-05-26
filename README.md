@@ -15,14 +15,15 @@ An interactive, self-contained HTML reference for tensor calculus — built from
 | 5 | The metric tensor — lengths, angles, signature |
 | 6 | Tensor products and rank-(p,q) tensors |
 | 7 | Contraction and the three fundamental operations |
-| 8 | What comes next (Branch A: manifolds; Branch B: symmetries) |
-| 9 | Annotated references |
+| 8 | Symmetric–antisymmetric decomposition |
+| 9 | Three-way decomposition: volume, shape, rotation |
+| 10 | Annotated references |
 
 ## What's inside
 
 - **One file, no build.** Everything — markup, styles, math, interactive SVG visualizations — lives in `index.html`. Open it locally or read it on the web.
 - **Math via KaTeX**, fonts via Google Fonts. Both load from CDNs on first view, then cache.
-- **Four interactive visualizations** illustrating rotating bases, covector level sets, metric ellipses, and tensor product components.
+- **Five interactive visualizations** illustrating rotating bases, covector level sets, metric ellipses, tensor product components, and the flow gradient L = D + W with principal axes.
 - **Notes that persist.** Each section has a textarea backed by `localStorage` — your notes survive page reloads in the same browser.
 
 ## Running locally
